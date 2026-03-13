@@ -149,7 +149,7 @@ class Dispatcher:
             self.drivers = drivers
         
         if requests is None:
-            self.requests = []
+            self.requests = {}
         else:
             self.requests = requests
     
@@ -173,7 +173,7 @@ class Dispatcher:
                     closest_driver = driver
         closest_driver.assign_request(request)
         request.status = "assigned"
-        self.requests.append(request)
+        self.requests[request] = closest_driver
     
     def get_active_requests(self):
         return self.requests
@@ -187,32 +187,6 @@ class Dispatcher:
         if not driver_exists:
             raise KeyError("No driver with provided driver_id")
         
-
-            
-
-        
-
-
-
-g = Graph({'A': {'B': 4, 'C': 2}, 
-           'B': {'D': 5, 'A': 4},
-           'C': {'B': 1, 'D': 8, 'A': 2}, 
-           'D': {'E': 2, 'C': 8, 'B': 5},
-           'E': {'D' : 2},
-           })
-
-d1 = Driver(1, "Roy", "A")
-d2 = Driver(2, "Boy", "D")
-
-r = DeliveryRequest(0, "B", "E", "2026-03-13")
-
-dis = Dispatcher(g, drivers=[d1, d2], requests=[r])
-
-dis.assign_request(r)
-
-pf = PathFinder(g)
-
-print(pf.shortest_path(r.pickup_location, r.dropoff_location))
 
 
 
