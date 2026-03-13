@@ -75,7 +75,9 @@ class PathFinder:
         else:
             min_heap = [(0, start)]
             distances = {location: -1 for location in self.graph.adjs}
+            print(start)
             distances[start] = 0
+            print(distances)
             previous = {location: None for location in self.graph.adjs}
 
             while min_heap:
@@ -117,39 +119,104 @@ class Driver:
         if assigned_requests is not None:
             self.assigned_requests = assigned_requests
         else:
-            assigned_requests = []
+            self.assigned_requests = []
     
     def assign_request(self, request):
         self.assigned_requests.append(request)
 
-    def complete_request(self, request_id):
-        self.assigned_requests.remove(request_id)
+    def complete_request(self, request):
+        self.assigned_requests.remove(request)
     
     def move_to(self, location):
         self.current_location = location
 
 class DeliveryRequest:
     
-    def __init__(self, request_id, pickup_location, dropoff_location, status, created_at):
+    def __init__(self, request_id, pickup_location, dropoff_location, created_at, status="pending"):
         self.request_id = request_id
         self.pickup_location = pickup_location
         self.dropoff_location = dropoff_location
         self.status = status
         self.created_at = created_at
 
+class Dispatcher:
 
-
-
-'''g = Graph({'A': {'C': 1, 'B': 2, 'D': 3}, 
-           'B': {'D': 2},
-           'C': {}, 
-           'D': {'E': 4},
-           'E': {},
-           'F': {}})
-p = PathFinder(g)
-print(p.shortest_distance('A', 'D'))
-print(p.shortest_path('A', 'E'))'''
+    def __init__(self, graph, drivers=None, requests = None):
+        self.graph = graph
+        if drivers is None:
+            self.drivers = []
+        else:
+            self.drivers = drivers
         
+        if requests is None:
+            self.requests = []
+        else:
+            self.requests = requests
+    
+    def assign_request(self, request):
+        path_finder = PathFinder(self.graph)
+        pickup_distances = {}
+        if not self.drivers:
+            raise ValueError("No drivers available")
+        i = 0
+        while not self.drivers[i].available:
+            i+=1
+        if (i == len(self.drivers)):
+            raise ValueError("No drivers available")
+        closest_driver = self.drivers[i]
+        shortest = path_finder.shortest_distance(closest_driver.current_location, request.pickup_location)
+        for driver in self.drivers[i+1:]:
+            if driver.available:
+                curr_distance = path_finder.shortest_distance(driver.current_location, request.pickup_location)
+                if curr_distance < shortest:
+                    shortest = curr_distance
+                    closest_driver = driver
+        closest_driver.assign_request(request)
+        request.status = "assigned"
+        self.requests.append(request)
+    
+    def get_active_requests(self):
+        return self.requests
+
+    def get_driver_assignments(self, driver_id):
+        driver_exists = False
+        for driver in self.drivers:
+            if driver.driver_id == driver_id:
+                driver_exists = True
+                return driver.assigned_requests
+        if not driver_exists:
+            raise KeyError("No driver with provided driver_id")
+        
+
+            
+
+        
+
+
+
+g = Graph({'A': {'B': 4, 'C': 2}, 
+           'B': {'D': 5, 'A': 4},
+           'C': {'B': 1, 'D': 8, 'A': 2}, 
+           'D': {'E': 2, 'C': 8, 'B': 5},
+           'E': {'D' : 2},
+           })
+
+d1 = Driver(1, "Roy", "A")
+d2 = Driver(2, "Boy", "D")
+
+r = DeliveryRequest(0, "B", "E", "2026-03-13")
+
+dis = Dispatcher(g, drivers=[d1, d2], requests=[r])
+
+dis.assign_request(r)
+
+pf = PathFinder(g)
+
+print(pf.shortest_path(r.pickup_location, r.dropoff_location))
+
+
+
+
  
 
 
