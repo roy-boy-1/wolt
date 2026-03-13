@@ -106,6 +106,38 @@ class PathFinder:
             result += end + ">-"
             end = previous[end]
         return start + result[::-1]
+    
+class Driver:
+    
+    def __init__(self, driver_id, name, current_location=None, available=True, assigned_requests=None):
+        self.driver_id = driver_id
+        self.name = name
+        self.current_location = current_location
+        self.available = available
+        if assigned_requests is not None:
+            self.assigned_requests = assigned_requests
+        else:
+            assigned_requests = []
+    
+    def assign_request(self, request):
+        self.assigned_requests.append(request)
+
+    def complete_request(self, request_id):
+        self.assigned_requests.remove(request_id)
+    
+    def move_to(self, location):
+        self.current_location = location
+
+class DeliveryRequest:
+    
+    def __init__(self, request_id, pickup_location, dropoff_location, status, created_at):
+        self.request_id = request_id
+        self.pickup_location = pickup_location
+        self.dropoff_location = dropoff_location
+        self.status = status
+        self.created_at = created_at
+
+
 
 
 '''g = Graph({'A': {'C': 1, 'B': 2, 'D': 3}, 
