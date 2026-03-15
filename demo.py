@@ -1,21 +1,21 @@
-import wolt
-graph = wolt.Graph({'A': {'B': 4, 'C': 2}, 
+import graph_algos, dispatch
+graph = graph_algos.Graph({'A': {'B': 4, 'C': 2}, 
            'B': {'D': 5, 'A': 4, 'C': 1},
            'C': {'B': 1, 'D': 8, 'A': 2}, 
            'D': {'E': 2, 'C': 8, 'B': 5},
            'E': {'D' : 2},
            })
 
-driver1 = wolt.Driver(1, "Roy", "A")
-driver2 = wolt.Driver(2, "Boy", "D")
+driver1 = dispatch.Driver(1, "Roy", "A")
+driver2 = dispatch.Driver(2, "Boy", "D")
 
-request = wolt.DeliveryRequest(0, "B", "E", "2026-03-13")
+request = dispatch.DeliveryRequest(0, "B", "E", "2026-03-13")
 
-dispatcher = wolt.Dispatcher(graph, drivers=[driver1, driver2], requests={request: None})
+dispatcher = dispatch.Dispatcher(graph, drivers=[driver1, driver2], requests={request: None})
 
 dispatcher.assign_request(request)
 
-pathfinder = wolt.PathFinder(graph)
+pathfinder = graph_algos.PathFinder(graph)
 
 assigned_driver = dispatcher.get_active_requests()[request]
 
