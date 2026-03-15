@@ -26,6 +26,14 @@ num_of_requests = 0
 def root():
     return {"graph": locations.adjs, "drivers": dispatcher.drivers}
 
+@app.post("/locations/", status_code=status.HTTP_201_CREATED)
+def add_location(location: Location):
+    if locations.location_exists(location.name):
+        raise HTTPException(status_code = status.HTTP_409_CONFLICT,
+                            detail="location already exists")
+    locations.add_location(location.name)
+    return location
+
 
     
     
