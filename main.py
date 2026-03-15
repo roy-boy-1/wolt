@@ -34,7 +34,18 @@ def add_location(location: Location):
     locations.add_location(location.name)
     return location
 
-
+@app.post("/roads/", status_code=status.HTTP_201_CREATED)
+def add_road(road: Road):
+    source, destination = road.source.name, road.destination.name
+    if not (locations.location_exists(source) and
+            locations.location_exists(destination)):
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail="one or more of locations does not exists")
+    if locations.road_exists(source, destination):
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT,
+                            detail="road already exists")
+    locations.add_road(source, destination, road.distance)
+    return road
     
     
 
