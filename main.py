@@ -19,6 +19,7 @@ app = FastAPI()
 
 dispatcher = dispatch.Dispatcher(graph=graph_algos.Graph())
 locations = dispatcher.graph
+path_finder = graph_algos.PathFinder(locations)
 num_of_drivers = 0
 num_of_requests = 0
 
@@ -40,7 +41,7 @@ def add_road(road: Road):
     if not (locations.location_exists(source) and
             locations.location_exists(destination)):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail="one or more of locations does not exists")
+                            detail="one or more of the locations does not exists")
     if locations.road_exists(source, destination):
         raise HTTPException(status_code=status.HTTP_409_CONFLICT,
                             detail="road already exists")
@@ -58,4 +59,12 @@ def add_driver(driver: Driver):
     num_of_drivers += 1
     return driver
 
-
+@app.get("/path", status_code=status.HTTP_200_OK)
+def get_shortest_path(start: str, end: str):
+    if not (locations.location_exists(start) and locations.location_exists(end)):
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail="one or more of the location does not exist")
+    path = path_finder.shortest_path(start, end)
+    distance = path_finder.shortest_distance(start, end)
+    return {"path": path.split('->'),
+            "distance": distance}
