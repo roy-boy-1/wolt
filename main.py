@@ -47,6 +47,15 @@ def add_road(road: Road):
     locations.add_road(source, destination, road.distance)
     return road
     
-    
+@app.post("/drivers/", status_code=status.HTTP_201_CREATED)
+def add_driver(driver: Driver):
+    global num_of_drivers
+    name, location = driver.name, driver.location.name
+    if not locations.location_exists(location):
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail="location does not exist")
+    dispatcher.drivers.append(dispatch.Driver(driver_id=num_of_drivers, name=name, current_location=location))
+    num_of_drivers += 1
+    return driver
 
 
