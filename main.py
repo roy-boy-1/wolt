@@ -1,5 +1,4 @@
-import graph_algos
-import dispatch
+from wolt import graph_algos, dispatch
 from fastapi import FastAPI, HTTPException, status
 from pydantic import BaseModel
 from datetime import datetime
@@ -69,7 +68,7 @@ def add_driver(driver: Driver):
 def get_shortest_path(start: str, end: str):
     if not (locations.location_exists(start) and locations.location_exists(end)):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail="one or more of the location does not exist")
+                            detail="one or more of the locations does not exist")
     path = path_finder.shortest_path(start, end)
     distance = path_finder.shortest_distance(start, end)
     return {"path": path.split('->'),
@@ -82,9 +81,34 @@ def add_request(request: DeliveryRequest):
     dropoff = request.dropoff_location.name
     if not (locations.location_exists(pickup) and locations.location_exists(dropoff)):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail="one or more of the location does not exist")
-    dispatcher.requests[dispatch.DeliveryRequest(num_of_requests, pickup,
-                                                  dropoff, datetime.now())] = None
+                            detail="one or more of the locations does not exist")
+    request_to_add = dispatch.DeliveryRequest(num_of_requests, pickup,
+                                                  dropoff, datetime.now())
+    dispatcher.requests[request_to_add] = None
     num_of_requests += 1 
     return request
+
+@app.post("/assign/{request_id}", status_code=status.HTTP_201_CREATED)
+def assign_request(request_id: int):
+    required_request = None
+    for request in dispatcher.requests:
+        if request.request_id == request_id:
+            required_request = request
+    if required_request == None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail="no request with corresponding request id")
+    dispatcher.assign_request(required_request)
+    assigned_driver = dispatcher.requests[required_request]
+    
+    return {
+        "driver": dispatcher.requests[required_request],
+        "route_to_pickup": path_finder.shortest_path(
+            assigned_driver.current_location,
+              required_request.pickup_location).split("->"),
+        "route_to_dropoff": path_finder.shortest_path(
+            required_request.pickup_location, 
+            required_request.dropoff_location
+        ).split("->")
+    }
+    
 
