@@ -6,7 +6,7 @@ class Graph:
         self.adjs = adjs if adjs is not None else {}
 
     def location_exists(self, location):
-        return self.adjs.get(location) is not None
+        return location in self.adjs
 
     def add_location(self, name):
         if not self.location_exists(name):
@@ -24,7 +24,8 @@ class Graph:
     
     def road_exists(self, source, destination):
         return (self.location_exists(source) and
-                 self.location_exists(destination) and self.adjs[source].get(destination) is not None)
+                 self.location_exists(destination) and 
+                 destination in self.adjs[source])
     
     
     def remove_road(self, source, destination):
