@@ -75,9 +75,7 @@ class PathFinder:
         else:
             min_heap = [(0, start)]
             distances = {location: -1 for location in self.graph.adjs}
-            print(start)
             distances[start] = 0
-            print(distances)
             previous = {location: None for location in self.graph.adjs}
 
             while min_heap:
