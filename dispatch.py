@@ -59,7 +59,7 @@ class Dispatcher:
         for driver in self.drivers[i+1:]:
             if driver.available:
                 curr_distance = path_finder.shortest_distance(driver.current_location, request.pickup_location)
-                if curr_distance < shortest:
+                if curr_distance != -1 and curr_distance < shortest:
                     shortest = curr_distance
                     closest_driver = driver
         closest_driver.assign_request(request)
