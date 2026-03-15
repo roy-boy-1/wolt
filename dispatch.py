@@ -14,9 +14,11 @@ class Driver:
     
     def assign_request(self, request):
         self.assigned_requests.append(request)
+        self.available = False
 
     def complete_request(self, request):
         self.assigned_requests.remove(request)
+        self.available = True
     
     def move_to(self, location):
         self.current_location = location
