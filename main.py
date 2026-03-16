@@ -46,7 +46,7 @@ def add_road(road: Road):
     if not (locations.location_exists(source) and
             locations.location_exists(destination)):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail="one or more of the locations does not exists")
+                            detail="one or more of the locations does not exist")
     if locations.road_exists(source, destination):
         raise HTTPException(status_code=status.HTTP_409_CONFLICT,
                             detail="road already exists")
@@ -69,8 +69,12 @@ def get_shortest_path(start: str, end: str):
     if not (locations.location_exists(start) and locations.location_exists(end)):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail="one or more of the locations does not exist")
-    path = path_finder.shortest_path(start, end)
-    distance = path_finder.shortest_distance(start, end)
+    try:
+        path = path_finder.shortest_path(start, end)
+        distance = path_finder.shortest_distance(start, end)
+    except ValueError:
+        raise HTTPException(status_code = status.HTTP_204_NO_CONTENT,
+                            detail="no valid path between the locations exists")
     return {"path": path.split('->'),
             "distance": distance}
 
@@ -97,18 +101,22 @@ def assign_request(request_id: int):
     if required_request == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail="no request with corresponding request id")
-    dispatcher.assign_request(required_request)
-    assigned_driver = dispatcher.requests[required_request]
+    try: 
+        dispatcher.assign_request(required_request)
+        assigned_driver = dispatcher.requests[required_request]
     
-    return {
-        "driver": dispatcher.requests[required_request],
-        "route_to_pickup": path_finder.shortest_path(
-            assigned_driver.current_location,
-              required_request.pickup_location).split("->"),
-        "route_to_dropoff": path_finder.shortest_path(
-            required_request.pickup_location, 
-            required_request.dropoff_location
-        ).split("->")
-    }
+        return {
+            "driver": dispatcher.requests[required_request],
+            "route_to_pickup": path_finder.shortest_path(
+                assigned_driver.current_location,
+                required_request.pickup_location).split("->"),
+            "route_to_dropoff": path_finder.shortest_path(
+                required_request.pickup_location, 
+                required_request.dropoff_location
+            ).split("->")
+        }
+    except ValueError:
+        raise HTTPException(status_code=status.HTTP_204_NO_CONTENT,
+                            detail="No driver available")
     
 
