@@ -1,0 +1,122 @@
+from wolt import graph_algos, dispatch
+from fastapi import FastAPI, HTTPException, status
+from pydantic import BaseModel
+from datetime import datetime
+
+class Location(BaseModel):
+    name: str
+
+class Road(BaseModel):
+    source: Location
+    destination: Location
+    distance: float
+
+class Driver(BaseModel):
+    name: str
+    location: Location
+
+class DeliveryRequest(BaseModel):
+    pickup_location: Location
+    dropoff_location: Location
+
+
+app = FastAPI()
+
+dispatcher = dispatch.Dispatcher(graph=graph_algos.Graph())
+locations = dispatcher.graph
+path_finder = graph_algos.PathFinder(locations)
+num_of_drivers = 0
+num_of_requests = 0
+
+@app.get("/")
+def root():
+    return {"graph": locations.adjs, "drivers": dispatcher.drivers}
+
+@app.post("/locations/", status_code=status.HTTP_201_CREATED)
+def add_location(location: Location):
+    if locations.location_exists(location.name):
+        raise HTTPException(status_code = status.HTTP_409_CONFLICT,
+                            detail="location already exists")
+    locations.add_location(location.name)
+    return location
+
+@app.post("/roads/", status_code=status.HTTP_201_CREATED)
+def add_road(road: Road):
+    source, destination = road.source.name, road.destination.name
+    if not (locations.location_exists(source) and
+            locations.location_exists(destination)):
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail="one or more of the locations does not exist")
+    if locations.road_exists(source, destination):
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT,
+                            detail="road already exists")
+    locations.add_road(source, destination, road.distance)
+    return road
+    
+@app.post("/drivers/", status_code=status.HTTP_201_CREATED)
+def add_driver(driver: Driver):
+    global num_of_drivers
+    name, location = driver.name, driver.location.name
+    if not locations.location_exists(location):
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail="location does not exist")
+    dispatcher.drivers.append(dispatch.Driver(driver_id=num_of_drivers, name=name, current_location=location))
+    num_of_drivers += 1
+    return driver
+
+@app.get("/path", status_code=status.HTTP_200_OK)
+def get_shortest_path(start: str, end: str):
+    if not (locations.location_exists(start) and locations.location_exists(end)):
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail="one or more of the locations does not exist")
+    try:
+        path = path_finder.shortest_path(start, end)
+        distance = path_finder.shortest_distance(start, end)
+    except ValueError:
+        raise HTTPException(status_code = status.HTTP_204_NO_CONTENT,
+                            detail="no valid path between the locations exists")
+    return {"path": path.split('->'),
+            "distance": distance}
+
+@app.post("/requests", status_code=status.HTTP_201_CREATED)
+def add_request(request: DeliveryRequest):
+    global num_of_requests
+    pickup = request.pickup_location.name
+    dropoff = request.dropoff_location.name
+    if not (locations.location_exists(pickup) and locations.location_exists(dropoff)):
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail="one or more of the locations does not exist")
+    request_to_add = dispatch.DeliveryRequest(num_of_requests, pickup,
+                                                  dropoff, datetime.now())
+    dispatcher.requests[request_to_add] = None
+    num_of_requests += 1 
+    return request
+
+@app.post("/assign/{request_id}", status_code=status.HTTP_201_CREATED)
+def assign_request(request_id: int):
+    required_request = None
+    for request in dispatcher.requests:
+        if request.request_id == request_id:
+            required_request = request
+    if required_request == None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail="no request with corresponding request id")
+    try: 
+        dispatcher.assign_request(required_request)
+        assigned_driver = dispatcher.requests[required_request]
+    
+        return {
+            "driver": dispatcher.requests[required_request],
+            "route_to_pickup": path_finder.shortest_path(
+                assigned_driver.current_location,
+                required_request.pickup_location).split("->"),
+            "route_to_dropoff": path_finder.shortest_path(
+                required_request.pickup_location, 
+                required_request.dropoff_location
+            ).split("->")
+        }
+    except ValueError:
+        raise HTTPException(status_code=status.HTTP_204_NO_CONTENT,
+                            detail="No driver available")
+    
+
