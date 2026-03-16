@@ -77,5 +77,3 @@ add_request("D", "E")
 assign_request(0)
 assign_request(1)
 assign_request(2)
-
-

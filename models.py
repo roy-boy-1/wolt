@@ -15,3 +15,4 @@ class Driver(BaseModel):
 class DeliveryRequest(BaseModel):
     pickup_location: Location
     dropoff_location: Location
+    

@@ -16,9 +16,3 @@ app.include_router(delivery_router.router)
 def root(locations: graph_algos.Graph = Depends(dependencies.get_locations),
          dispatcher: dispatch.Dispatcher = Depends(dependencies.get_dispatcher)):
     return {"graph": locations.adjs, "drivers": dispatcher.drivers}
-
-
-    
-
-    
-

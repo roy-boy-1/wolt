@@ -10,8 +10,8 @@ router = APIRouter()
 @router.post("/drivers/", status_code=status.HTTP_201_CREATED)
 def add_driver(driver: Driver, dispatcher: dispatch.Dispatcher = 
                Depends(dependencies.get_dispatcher), 
-               ids =
-                 Depends(dependencies.get_ids)):
+               ids = 
+               Depends(dependencies.get_ids)):
     name, location = driver.name, driver.location.name
     try:
         dispatcher.add_driver(
@@ -23,17 +23,15 @@ def add_driver(driver: Driver, dispatcher: dispatch.Dispatcher =
     ids["drivers"] += 1
     return driver
 
-
-
 @router.post("/requests", status_code=status.HTTP_201_CREATED)
-def add_request(request: DeliveryRequest,
+def add_request(request: DeliveryRequest, 
                 dispatcher: dispatch.Dispatcher = 
-               Depends(dependencies.get_dispatcher), 
-               ids = Depends(dependencies.get_ids)):
+                Depends(dependencies.get_dispatcher), 
+                ids = Depends(dependencies.get_ids)):
     pickup = request.pickup_location.name
     dropoff = request.dropoff_location.name
-    request_to_add = dispatch.DeliveryRequest(ids["requests"], pickup,
-                                                  dropoff, datetime.now())
+    request_to_add = dispatch.DeliveryRequest(ids["requests"], pickup, 
+                                              dropoff, datetime.now())
     try:
         dispatcher.add_request(request_to_add)
     except KeyError as e:
@@ -41,14 +39,13 @@ def add_request(request: DeliveryRequest,
                             detail=str(e))
     ids["requests"] += 1 
     return request
-    
 
 @router.post("/assign/{request_id}", status_code=status.HTTP_201_CREATED)
-def assign_request(request_id: int,
+def assign_request(request_id: int, 
                    dispatcher: dispatch.Dispatcher = 
-               Depends(dependencies.get_dispatcher), 
-               path_finder: graph_algos.PathFinder = 
-               Depends(dependencies.get_path_finder)):
+                   Depends(dependencies.get_dispatcher), 
+                   path_finder: graph_algos.PathFinder = 
+                   Depends(dependencies.get_path_finder)):
     required_request = None
     for request in dispatcher.requests:
         if request.request_id == request_id:

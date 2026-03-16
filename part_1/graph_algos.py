@@ -110,3 +110,4 @@ class PathFinder:
             result += end + ">-"
             end = previous[end]
         return start + result[::-1]
+    

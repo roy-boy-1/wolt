@@ -21,4 +21,3 @@ def get_path_finder() -> graph_algos.PathFinder:
 
 def get_ids() -> dict:
     return all_data.ids
-

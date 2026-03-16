@@ -105,4 +105,5 @@ class Dispatcher:
                 driver_exists = True
                 return driver.assigned_requests
         if not driver_exists:
-            raise KeyError(f"No driver with driver_id {driver_id}")          
+            raise KeyError(f"No driver with driver_id {driver_id}")
+        
