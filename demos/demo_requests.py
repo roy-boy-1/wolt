@@ -15,8 +15,8 @@ def add_loc(loc):
 def add_road(s, de, d):
     url = r"http://127.0.0.1:8000/roads"
     road = {
-        "source": s,
-        "destination": de,
+        "source": {"name": s},
+        "destination": {"name": de},
         "distance": d,
     }
 
@@ -29,7 +29,7 @@ def add_driver(name, location):
     url = r"http://127.0.0.1:8000/drivers"
     driver = {
         "name": name,
-        "location": location,
+        "location": {"name": location},
     }
 
     response = requests.post(url, json=driver)
@@ -60,14 +60,23 @@ add_loc("B")
 add_loc("C")
 add_loc("B")
 
-add_road({"name": "A"}, {"name": "B"}, 3)
-add_road({"name": "A"}, {"name": "B"}, 3)
+add_road("A", "B", 3)
+add_road("A", "B", 3)
+add_road("A", "C", 1)
+add_road("B", "C", 1)
+add_road("B", "C", 0)
 
-add_driver("Roy", location={"name": "A"})
-add_driver("Roy", location={"name": "B"})
+add_driver("Reagan", "A")
+add_driver("Brett", "B")
+add_driver("Alpha-Beta", "D")
 
 add_request("A", "B")
+add_request("A", "C")
+add_request("A", "D")
+add_request("D", "E")
 
 assign_request(0)
+assign_request(1)
+assign_request(2)
 
 
