@@ -13,10 +13,14 @@ class Driver:
             self.assigned_requests = []
     
     def assign_request(self, request):
+        if request in self.assigned_requests:
+            raise ValueError(f"request {request} already assigned")
         self.assigned_requests.append(request)
         self.available = False
 
     def complete_request(self, request):
+        if request not in self.assigned_requests:
+            raise KeyError(f"request {request} does not exist")
         self.assigned_requests.remove(request)
         self.available = True
     
