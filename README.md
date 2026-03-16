@@ -13,6 +13,7 @@ to run it.
 
 ## Part 2
 Wolt is now a REST API.  
+
 main.py contains POST endpoints for adding locations, roads, drivers, delivery requests and for assigning delivery requests.  
 It also contains GET endpoints, namely root for a view of the location graph and drivers and /path for getting the shortest path between two locations.  
 
