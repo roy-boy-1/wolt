@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, status
-from ..models import *
+from ..models import Location, Road
 from .. import dependencies
 
 router = APIRouter()
