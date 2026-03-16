@@ -36,21 +36,41 @@ class Dispatcher:
 
     def __init__(self, graph, drivers=None, requests=None):
         self.graph = graph
-        
+
         self.drivers = []
         if drivers is not None:
             for driver in drivers:
-                if graph.location_exists(driver.current_location):
-                    self.drivers.append(driver)
+                try:
+                    self.add_driver(driver)
+                except ValueError:
+                    pass
 
         self.requests = {}
         if requests is not None:
             for request in requests:
-                if (graph.location_exists(request.pickup_location)
-                    and graph.location_exists(request.dropoff_location)):
-                    self.requests[request] = requests[request]
+                try:
+                    self.add_request(request)
+                except ValueError:
+                    pass
+
     
+    def add_driver(self, driver):
+        if not self.graph.location_exists(driver.current_location):
+            raise ValueError("driver's current location does not exist")
+        else:
+            self.drivers.append(driver)
+
+    def validate_request(self, request):
+        if not (self.graph.location_exists(request.pickup_location) and
+                self.graph.location_exists(request.dropoff_location)):
+            raise ValueError("one or more of the request's locations do not exist")
+    
+    def add_request(self, request):
+        self.validate_request(request)
+        self.requests[request] = None
+
     def assign_request(self, request):
+        self.validate_request(request)
         path_finder = graph_algos.PathFinder(self.graph)
         pickup_distances = {}
         if not self.drivers:
