@@ -34,17 +34,21 @@ class DeliveryRequest:
 
 class Dispatcher:
 
-    def __init__(self, graph, drivers=None, requests = None):
+    def __init__(self, graph, drivers=None, requests=None):
         self.graph = graph
-        if drivers is None:
-            self.drivers = []
-        else:
-            self.drivers = drivers
         
-        if requests is None:
-            self.requests = {}
-        else:
-            self.requests = requests
+        self.drivers = []
+        if drivers is not None:
+            for driver in drivers:
+                if graph.location_exists(driver.current_location):
+                    self.drivers.append(driver)
+
+        self.requests = {}
+        if requests is not None:
+            for request in requests:
+                if (graph.location_exists(request.pickup_location)
+                    and graph.location_exists(request.dropoff_location)):
+                    self.requests[request] = requests[request]
     
     def assign_request(self, request):
         path_finder = graph_algos.PathFinder(self.graph)
