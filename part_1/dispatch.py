@@ -71,7 +71,7 @@ class Dispatcher:
         path_finder = graph_algos.PathFinder(self.graph)
         pickup_distances = {}
         if not self.drivers:
-            raise ValueError("No drivers available")
+            raise ValueError("no drivers available")
         closest_driver = None
         for driver in self.drivers:
             if driver.available:
@@ -81,7 +81,7 @@ class Dispatcher:
                 except ValueError:
                     pass
         if closest_driver is None:
-            raise ValueError("No drivers available")
+            raise ValueError("no drivers available")
         for driver in self.drivers:
             if driver.available:
                 try:
