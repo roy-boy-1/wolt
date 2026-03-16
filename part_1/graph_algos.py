@@ -14,18 +14,22 @@ class Graph:
         else:
             raise ValueError("location provided already exists")
     
-    def add_road(self, source, destination, distance):
-        if not self.location_exists(source) or not self.location_exists(destination):
-            raise KeyError("one or more of the locations does not exist")
-        elif distance <= 0:
-            raise ValueError("distance has to be positive")
-        else:
-            self.adjs[source][destination] = distance
+    
     
     def road_exists(self, source, destination):
         return (self.location_exists(source) and
                  self.location_exists(destination) and 
                  destination in self.adjs[source])
+    
+    def add_road(self, source, destination, distance):
+        if not self.location_exists(source) or not self.location_exists(destination):
+            raise KeyError("one or more of the locations does not exist")
+        elif distance <= 0:
+            raise ValueError("distance has to be positive")
+        elif self.road_exists(source, destination):
+            raise ValueError("road already exists")
+        else:
+            self.adjs[source][destination] = distance
     
     
     def remove_road(self, source, destination):
