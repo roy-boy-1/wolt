@@ -1,5 +1,4 @@
-from fastapi import FastAPI, HTTPException, status, APIRouter, Depends
-from pydantic import BaseModel
+from fastapi import HTTPException, status, APIRouter, Depends
 from datetime import datetime
 from ..part_1 import dispatch
 from ..part_1 import graph_algos

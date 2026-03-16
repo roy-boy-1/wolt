@@ -1,5 +1,4 @@
 import requests
-import json
 def add_loc(loc):
 
     url = r"http://127.0.0.1:8000/locations"
