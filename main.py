@@ -1,7 +1,5 @@
-from fastapi import FastAPI,  Depends
+from fastapi import FastAPI
 from .models import *
-from .part_1 import dispatch
-from .part_1 import graph_algos
 from .routers import graph_router
 from .routers import delivery_router
 from . import dependencies
@@ -12,7 +10,9 @@ app.include_router(graph_router.router)
 
 app.include_router(delivery_router.router)
 
+locations = dependencies.get_locations()
+dispatcher = dependencies.get_dispatcher()
+
 @app.get("/")
-def root(locations: graph_algos.Graph = Depends(dependencies.get_locations),
-         dispatcher: dispatch.Dispatcher = Depends(dependencies.get_dispatcher)):
+def root():
     return {"graph": locations.adjs, "drivers": dispatcher.drivers}

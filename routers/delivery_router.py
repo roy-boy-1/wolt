@@ -1,17 +1,16 @@
-from fastapi import HTTPException, status, APIRouter, Depends
+from fastapi import HTTPException, status, APIRouter
 from datetime import datetime
 from ..part_1 import dispatch
-from ..part_1 import graph_algos
 from ..models import Driver, DeliveryRequest
 from .. import dependencies
 
 router = APIRouter()
+dispatcher = dependencies.get_dispatcher()
+ids = dependencies.get_ids()
+path_finder = dependencies.get_path_finder()
 
 @router.post("/drivers/", status_code=status.HTTP_201_CREATED)
-def add_driver(driver: Driver, dispatcher: dispatch.Dispatcher = 
-               Depends(dependencies.get_dispatcher), 
-               ids = 
-               Depends(dependencies.get_ids)):
+def add_driver(driver: Driver):
     name, location = driver.name, driver.location.name
     try:
         dispatcher.add_driver(
@@ -24,10 +23,7 @@ def add_driver(driver: Driver, dispatcher: dispatch.Dispatcher =
     return driver
 
 @router.post("/requests", status_code=status.HTTP_201_CREATED)
-def add_request(request: DeliveryRequest, 
-                dispatcher: dispatch.Dispatcher = 
-                Depends(dependencies.get_dispatcher), 
-                ids = Depends(dependencies.get_ids)):
+def add_request(request: DeliveryRequest):
     pickup = request.pickup_location.name
     dropoff = request.dropoff_location.name
     request_to_add = dispatch.DeliveryRequest(ids["requests"], pickup, 
@@ -41,11 +37,7 @@ def add_request(request: DeliveryRequest,
     return request
 
 @router.post("/assign/{request_id}", status_code=status.HTTP_201_CREATED)
-def assign_request(request_id: int, 
-                   dispatcher: dispatch.Dispatcher = 
-                   Depends(dependencies.get_dispatcher), 
-                   path_finder: graph_algos.PathFinder = 
-                   Depends(dependencies.get_path_finder)):
+def assign_request(request_id: int):
     required_request = None
     for request in dispatcher.requests:
         if request.request_id == request_id:
