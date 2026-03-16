@@ -98,10 +98,7 @@ class PathFinder:
                 return distances, previous
             
     def shortest_distance(self, start, end):
-        try:
-            return self.dijkstra(start, end)[0][end]
-        except ValueError:
-            return -1
+        return self.dijkstra(start, end)[0][end]
     
     def shortest_path(self, start, end):
         result = ""
