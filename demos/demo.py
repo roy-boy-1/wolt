@@ -1,4 +1,4 @@
-import graph_algos, dispatch
+from part_1 import graph_algos, dispatch
 
 graph = graph_algos.Graph({'A': {'B': 4, 'C': 2}, 
            'B': {'D': 5, 'A': 4, 'C': 1},

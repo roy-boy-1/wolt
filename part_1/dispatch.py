@@ -1,4 +1,4 @@
-import graph_algos
+from . import graph_algos
 
 class Driver:
     
