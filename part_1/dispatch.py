@@ -55,15 +55,12 @@ class Dispatcher:
 
     
     def add_driver(self, driver):
-        if not self.graph.location_exists(driver.current_location):
-            raise ValueError("driver's current location does not exist")
-        else:
-            self.drivers.append(driver)
+        self.graph.validate_location(driver.current_location)
+        self.drivers.append(driver)
 
     def validate_request(self, request):
-        if not (self.graph.location_exists(request.pickup_location) and
-                self.graph.location_exists(request.dropoff_location)):
-            raise ValueError("one or more of the request's locations do not exist")
+        self.graph.validate_location(request.pickup_location)
+        self.graph.validate_location(request.dropoff_location)
     
     def add_request(self, request):
         self.validate_request(request)
@@ -75,14 +72,17 @@ class Dispatcher:
         pickup_distances = {}
         if not self.drivers:
             raise ValueError("No drivers available")
-        i = 0
-        while not self.drivers[i].available:
-            i+=1
-        if (i == len(self.drivers)):
+        closest_driver = None
+        for driver in self.drivers:
+            if driver.available:
+                try:
+                    shortest = path_finder.shortest_distance(driver.current_location, request.pickup_location)
+                    closest_driver = driver
+                except ValueError:
+                    pass
+        if closest_driver is None:
             raise ValueError("No drivers available")
-        closest_driver = self.drivers[i]
-        shortest = path_finder.shortest_distance(closest_driver.current_location, request.pickup_location)
-        for driver in self.drivers[i+1:]:
+        for driver in self.drivers:
             if driver.available:
                 try:
                     curr_distance = path_finder.shortest_distance(driver.current_location, request.pickup_location)
@@ -105,4 +105,4 @@ class Dispatcher:
                 driver_exists = True
                 return driver.assigned_requests
         if not driver_exists:
-            raise KeyError("No driver with provided driver_id")          
+            raise KeyError(f"No driver with driver_id {driver_id}")          
