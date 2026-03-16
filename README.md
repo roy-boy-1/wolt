@@ -19,8 +19,8 @@ Activate with
 fastapi dev
 ```
 
-main.py contains POST endpoints for adding locations, roads, drivers, delivery requests and for assigning delivery requests.  
-It also contains GET endpoints, namely root for a view of the location graph and drivers and /path for getting the shortest path between two locations.  
+main.py contains the main application, which uses the router found in routers/graph_router.py for manipulating the graph and its locations (creating a location or a road and finding the shortest path between two locations) and the router found in
+routers/delivery_router.py for operations realting to deliveries (creating drivers and creating and assigning requests)
 
 Also included is a demo_requests.py script. Use
 ```bash
